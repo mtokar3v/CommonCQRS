@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using CRUDUserFeature.DTOs;
+using CRUDUserFeature.Commands;
 using RootDb.Entities;
 
 namespace AppMappingProfile
@@ -8,7 +8,7 @@ namespace AppMappingProfile
     {
         public RootDbMappingProfile()
         {
-            CreateMap<User, UserDto>().ReverseMap();
+            CreateMap<User, CreateUserCommand>();
         }
     }
 }

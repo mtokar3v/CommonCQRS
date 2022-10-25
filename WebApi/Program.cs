@@ -1,20 +1,30 @@
 using AppMappingProfile;
-using CRUDUserFeature.DTOs;
 using Interfaces.Repositories;
-using MediatR;
 using Repositories;
 using RootDb;
+using System.Text.Json.Serialization;
+
+using WebApi.Extensions;
+using WebApi.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
+builder.Services
+    .AddControllers(options => options.Filters.Add(typeof(HttpGlobalExceptionFilter)))
+    .AddJsonOptions(options => 
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        options.JsonSerializerOptions.IgnoreNullValues = true;
+    });
+
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-builder.Services.AddAutoMapper(typeof(RootDbMappingProfile));
+builder.Services.AddMediatRDependency();
+
 builder.Services.AddDbContext<RootDbContext>();
 builder.Services.AddTransient<IUserRepository, UserRepository>();
 
-builder.Services.AddMediatR(typeof(UserDto).Assembly);
+builder.Services.AddAutoMapper(typeof(RootDbMappingProfile));
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 

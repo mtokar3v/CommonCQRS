@@ -1,8 +1,9 @@
 ﻿using CRUDUserFeature.Commands;
-using CRUDUserFeature.DTOs;
 using CRUDUserFeature.Queries;
+
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using RootDb.Entities;
 
 namespace WebApi.Controllers
 {
@@ -17,24 +18,40 @@ namespace WebApi.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get()
-        {
-            var users = await _mediator.Send(new GetUsersQuery());
-            return Ok(users);
-        }
+        [ProducesDefaultResponseType]
+        [ProducesResponseType(typeof(IEnumerable<User>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> Get() => Ok(await _mediator.Send(new GetUsersQuery()));
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> Get(Guid id)
-        {
-            var user = await _mediator.Send(new GetUserByIdQuery(id));
-            return Ok(user);
-        }
+        [ProducesDefaultResponseType]
+        [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(User), StatusCodes.Status200OK)]
+        public async Task<IActionResult> Get([FromRoute] Guid id) => Ok(await _mediator.Send(new GetUserByIdQuery(id)));
 
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] UserDto user)
+        [ProducesDefaultResponseType]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Post([FromBody] CreateUserCommand request)
         {
-            await _mediator.Send(new InsertUserCommand(user));
-            return Ok();
+            await _mediator.Send(request);
+            return NoContent();
         }
+
+        [HttpDelete]
+        [ProducesDefaultResponseType]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> Delete([FromBody] DeleteUserCommand request)
+        {
+            await _mediator.Send(request);
+            return NoContent();
+        }
+
+        [HttpPut]
+        [ProducesDefaultResponseType]
+        [ProducesResponseType(typeof(User), StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> Update([FromBody] UpdateUserEmailCommand request) => Ok(await _mediator.Send(request));
     }
 }
